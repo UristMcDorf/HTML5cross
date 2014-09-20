@@ -1,4 +1,4 @@
-var columnCellCount = 0, columnHints, context, image, rowCellCount = 0, rowHints;
+var columnHintCellCount = 0, columnHints, context, image, rowHintCellCount = 0, rowHints;
 
 
 function GeneratePuzzle()
@@ -43,9 +43,9 @@ function GeneratePuzzle()
             rowHints[i] = rowHints[i].trim();
         }
         
-        if (hintCount > rowCellCount)
+        if (hintCount > rowHintCellCount)
         {
-            rowCellCount = hintCount;
+            rowHintCellCount = hintCount;
         }
         hintCount = 0;
         
@@ -90,9 +90,9 @@ function GeneratePuzzle()
             columnHints[i] = columnHints[i].trim();
         }
         
-        if (hintCount > columnCellCount)
+        if (hintCount > columnHintCellCount)
         {
-            columnCellCount = hintCount;
+            columnHintCellCount = hintCount;
         }
         hintCount = 0;
         
@@ -106,16 +106,16 @@ function GeneratePuzzle()
     {
         console.log("Row " + i + " hint: " + rowHints[i]);
     }
-    console.log("Row cell count: " + rowCellCount);
+    console.log("Row cell count: " + rowHintCellCount);
     
     for (var i = 0; i < image.width; i++)
     {
         console.log("Column " + i + " hint: " + columnHints[i]);
     }
-    console.log("Column cell count: " + columnCellCount);*/
+    console.log("Column cell count: " + columnHintCellCount);*/
     
-    context.canvas.width = (image.width + rowCellCount) * 10 + 1;
-    context.canvas.height = (image.height + columnCellCount) * 10 + 1;
+    context.canvas.width = (image.width + rowHintCellCount) * 10 + 1;
+    context.canvas.height = (image.height + columnHintCellCount) * 10 + 1;
 }
 
 function DrawGrid()
