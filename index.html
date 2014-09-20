@@ -2,20 +2,35 @@
     <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="Stylesheet.css">
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js">
-        <script type="text/javascript" language="javascript">
+        <script src="jquery.min.js"></script>
+        <script src="HTML5cross.js"></script>
+        <script>
             $(document).ready(function ()
-                              {
-                                  $("#content").css("width", $(window).width());
-                                  $("#content").css("height", $(window).height());
-                              }); 
+            {
+                $("#content").css("width", $(window).width());
+                $("#content").css("height", $(window).height());
+        
+                context = $("canvas")[0].getContext("2d");
+                image = $("#puzzle_image")[0];
+                
+                $("#image_select").change(function ()
+                                         {
+                                             image.onload = function()
+                                                            {
+                                                                context.drawImage(image, 0, 0);
+                                                                GeneratePuzzle();
+                                                            };
+                                             image.src = this.value;
+                                         });
+            });
         </script>
     </head>
     <body>
+        <img id="puzzle_image" class="hidden"></img>
         <div id="content">
             <div class="centered">
                 <canvas id="canvas" width="150" height="150"></canvas>
-                <input id="image_upload" type="file">
+                <input id="image_select" type="file" accept="image/png">
             </div>
         </div>
     </body>
