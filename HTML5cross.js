@@ -115,20 +115,20 @@ function GeneratePuzzle()
     console.log("Column cell count: " + columnHintCellCount);*/
     
     context.canvas.width = (image.width + rowHintCellCount) * 10 + 1;
-    context.canvas.height = (image.height + columnHintCellCount) * 10 + 1;
+    context.canvas.height = (image.height + columnHintCellCount + rowHintCellCount) * 10 + 1;
 }
 
 function DrawGrid()
 {
-    for (var x = 0.5; x < context.canvas.width; x += 10)
+    for (var x = 0.5 + (rowHintCellCount * 10); x < context.canvas.width; x += 10)
     {
-        context.moveTo(x, 0);
+        context.moveTo(x, columnHintCellCount * 10);
         context.lineTo(x, context.canvas.height);
     }
     
-    for (var y = 0.5; y < context.canvas.height; y += 10)
+    for (var y = 0.5 + (columnHintCellCount * 10); y < context.canvas.height; y += 10)
     {
-        context.moveTo(0, y);
+        context.moveTo(rowHintCellCount * 10, y);
         context.lineTo(context.canvas.width - 1, y);
     }
     
