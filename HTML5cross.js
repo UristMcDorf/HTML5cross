@@ -154,5 +154,10 @@ function DrawHints()
     context.moveTo(rowHintCellCount * 10, 0.5);
     context.lineTo(context.canvas.width, 0.5);
     
+    for (var row = 0; row < image.height; row++)
+    {
+        context.fillText(rowHints[row], 0.5, (columnHintCellCount * 10) + (((row + 1) * 10) - 1));
+    }
+    
     context.stroke();
 }
