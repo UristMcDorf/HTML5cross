@@ -115,7 +115,7 @@ function GeneratePuzzle()
     console.log("Column cell count: " + columnHintCellCount);*/
     
     context.canvas.width = (image.width + rowHintCellCount) * 10 + 1;
-    context.canvas.height = (image.height + columnHintCellCount + rowHintCellCount) * 10 + 1;
+    context.canvas.height = (image.height + columnHintCellCount) * 10 + 1;
 }
 
 function DrawGrid()
@@ -132,6 +132,27 @@ function DrawGrid()
         context.lineTo(context.canvas.width - 1, y);
     }
     
-    context.strokeStyle = "#ccc";
+    context.strokeStyle = "#bbb";
+    context.stroke();
+}
+
+function DrawHints()
+{
+    for (var x = 0.5 + (rowHintCellCount * 10); x < context.canvas.width; x += 10)
+    {
+        context.moveTo(x, 0);
+        context.lineTo(x, context.canvas.height);
+    }
+    context.moveTo(0.5, columnHintCellCount * 10);
+    context.lineTo(0.5, context.canvas.height);
+
+    for (var y = 0.5 + (columnHintCellCount * 10); y < context.canvas.height; y += 10)
+    {
+        context.moveTo(0, y);
+        context.lineTo(context.canvas.width - 1, y);
+    }
+    context.moveTo(rowHintCellCount * 10, 0.5);
+    context.lineTo(context.canvas.width, 0.5);
+    
     context.stroke();
 }
