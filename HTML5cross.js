@@ -156,7 +156,20 @@ function DrawHints()
     
     for (var row = 0; row < image.height; row++)
     {
-        context.fillText(rowHints[row], 0.5, (columnHintCellCount * 10) + (((row + 1) * 10) - 1));
+        var hints = rowHints[row].split(" ");
+        for (var i = 1; i <= hints.length; i++)
+        {
+            context.fillText(hints[hints.length - i], (rowHintCellCount - i) * 10 + 0.5, ((columnHintCellCount + row + 1) * 10) - 1);
+        }
+    }
+    
+    for (var column = 0; column < image.width; column++)
+    {
+        var hints = columnHints[column].split(" ");
+        for (var i = 1; i <= hints.length; i++)
+        {
+            context.fillText(hints[hints.length - i], (rowHintCellCount + column + 0.25) * 10 - 1, (columnHintCellCount - i + 1) * 10 - 1);
+        }
     }
     
     context.stroke();
