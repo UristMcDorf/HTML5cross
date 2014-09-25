@@ -1,4 +1,5 @@
 var columnHintCellCount = 0, columnHints, context, cellSize = 10, image, rowHintCellCount = 0, rowHints;
+var $canvas;
 
 
 function GeneratePuzzle()
@@ -174,4 +175,33 @@ function DrawHints()
     }
     
     context.stroke();
+}
+
+function SetUpEvents()
+{
+    $(context.canvas).click(function(eventArgs)
+                            {
+                                var cursor =
+                                {
+                                    x: eventArgs.pageX - $canvas.offset().left - (rowHintCellCount * cellSize),
+                                    y: eventArgs.pageY - $canvas.offset().top - (columnHintCellCount * cellSize)
+                                };
+                                
+                                if (cursor.x >= 0 && cursor.x < $canvas.width()
+                                    &&
+                                    cursor.y >= 0 && cursor.y < $canvas.height())
+                                {
+                                    var cell =
+                                    {
+                                        column: Math.floor(cursor.x / cellSize),
+                                        row: Math.floor(cursor.y / cellSize)
+                                    };
+                                    
+                                    context.rect((rowHintCellCount * cellSize) + (cell.column * cellSize),
+                                                 (columnHintCellCount * cellSize) + (cell.row * cellSize),
+                                                 cellSize, cellSize);
+                                    context.fillStyle = "black";
+                                    context.fill();
+                                }
+                            });
 }

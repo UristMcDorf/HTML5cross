@@ -9,8 +9,10 @@
             {
                 $("#content").css("width", $(window).width());
                 $("#content").css("height", $(window).height());
-        
-                context = $("canvas")[0].getContext("2d");
+                
+                $canvas = $("canvas");
+                context = $canvas[0].getContext("2d");
+                
                 image = $("#puzzle_image")[0];
                 
                 $("#image_select").change(function ()
@@ -21,6 +23,7 @@
                                                                 GeneratePuzzle();
                                                                 DrawGrid();
                                                                 DrawHints();
+                                                                SetUpEvents();
                                                             };
                                              image.src = this.value;
                                          });
