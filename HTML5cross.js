@@ -1,4 +1,4 @@
-var columnHintCellCount = 0, columnHints, context, cellSize = 10, image, rowHintCellCount = 0, rowHints;
+var columnHintCellCount = 0, columnHints, context, cellSize = 10, image, rowHintCellCount = 0, rowHints, playerSolution;
 var $canvas;
 
 
@@ -9,8 +9,12 @@ function GeneratePuzzle()
     rowHints = new Array(image.height);
     columnHints = new Array(image.width);
     
+    playerSolution = new Array(image.height);
+    
     for (var i = 0, hintCount = 0; i < image.height; i++)
     {
+        playerSolution[i] = new Array(image.width);
+    
         rowHints[i] = "";
         var rowData = context.getImageData(0, i, image.width, 1);
         
@@ -115,12 +119,22 @@ function GeneratePuzzle()
     }
     console.log("Column cell count: " + columnHintCellCount);*/
     
+    for (var y = 0; y < playerSolution.length; y++)
+    {
+        for (var x = 0; x < playerSolution[y].length; x++)
+        {
+            playerSolution[y][x] = 0;
+        }
+    }
+    
     context.canvas.width = (image.width + rowHintCellCount) * cellSize + 1;
     context.canvas.height = (image.height + columnHintCellCount) * cellSize + 1;
 }
 
 function DrawGrid()
 {
+    context.beginPath();
+    
     for (var x = 0.5 + (rowHintCellCount * cellSize); x < context.canvas.width; x += cellSize)
     {
         context.moveTo(x, columnHintCellCount * cellSize);
@@ -135,11 +149,16 @@ function DrawGrid()
     
     context.strokeStyle = "#bbb";
     context.stroke();
+    
+    context.closePath();
 }
 
 function DrawHints()
 {
+    context.beginPath();
+
     context.font = cellSize + "px sans-serif";
+    
     for (var x = 0.5 + (rowHintCellCount * cellSize); x < context.canvas.width; x += cellSize)
     {
         context.moveTo(x, 0);
@@ -155,6 +174,10 @@ function DrawHints()
     }
     context.moveTo(rowHintCellCount * cellSize, 0.5);
     context.lineTo(context.canvas.width, 0.5);
+    
+    context.stroke();
+    
+    context.closePath();
     
     for (var row = 0; row < image.height; row++)
     {
@@ -173,8 +196,6 @@ function DrawHints()
             context.fillText(hints[hints.length - i], (rowHintCellCount + column + 0.25) * cellSize - 1, ((columnHintCellCount - i + 1) * cellSize) - (cellSize / 10));
         }
     }
-    
-    context.stroke();
 }
 
 function SetUpEvents()
@@ -197,11 +218,50 @@ function SetUpEvents()
                                         row: Math.floor(cursor.y / cellSize)
                                     };
                                     
-                                    context.rect((rowHintCellCount * cellSize) + (cell.column * cellSize),
-                                                 (columnHintCellCount * cellSize) + (cell.row * cellSize),
-                                                 cellSize, cellSize);
-                                    context.fillStyle = "black";
-                                    context.fill();
+                                    if (playerSolution[cell.row][cell.column] == 0)
+                                    {
+                                        playerSolution[cell.row][cell.column] = 1;
+                                    }
+                                    else
+                                    {
+                                        playerSolution[cell.row][cell.column] = 0;
+                                    }
+                                    Render();
                                 }
                             });
+}
+
+function ClearCanvas()
+{
+    context.save();
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+    context.restore();
+    
+}
+
+function Render()
+{
+    ClearCanvas();
+    
+    DrawGrid();
+    DrawHints();
+    
+    // Render user solution
+    for (var y = 0; y < playerSolution.length; y++)
+    {
+        for (var x = 0; x < playerSolution[y].length; x++)
+        {
+            if (playerSolution[y][x] == 1)
+            {
+                context.beginPath();
+                context.rect((rowHintCellCount * cellSize) + (x * cellSize),
+                            (columnHintCellCount * cellSize) + (y * cellSize),
+                            cellSize, cellSize);
+                context.fillStyle = "black";
+                context.fill();
+                context.closePath();
+            }
+        }
+    }
 }
