@@ -23,9 +23,7 @@ function GeneratePuzzle()
             if (rowData.data[j] == 255)
             {
                 setLength++;
-            }
-            else
-            {
+            } else {
                 if (setLength > 0)
                 {
                     rowHints[i] = rowHints[i].concat(setLength + " ");
@@ -42,9 +40,7 @@ function GeneratePuzzle()
             setLength = 0;
             
             hintCount++;
-        }
-        else
-        {
+        } else {
             rowHints[i] = rowHints[i].trim();
         }
         
@@ -70,9 +66,7 @@ function GeneratePuzzle()
             if (columnData.data[j] == 255)
             {
                 setLength++;
-            }
-            else
-            {
+            } else {
                 if (setLength > 0)
                 {
                     columnHints[i] = columnHints[i].concat(setLength + " ");
@@ -89,9 +83,7 @@ function GeneratePuzzle()
             setLength = 0;
             
             hintCount++;
-        }
-        else
-        {
+        } else {
             columnHints[i] = columnHints[i].trim();
         }
         
@@ -107,17 +99,6 @@ function GeneratePuzzle()
         }
     }
     
-    /*for (var i = 0; i < image.height; i++)
-    {
-        console.log("Row " + i + " hint: " + rowHints[i]);
-    }
-    console.log("Row cell count: " + rowHintCellCount);
-    
-    for (var i = 0; i < image.width; i++)
-    {
-        console.log("Column " + i + " hint: " + columnHints[i]);
-    }
-    console.log("Column cell count: " + columnHintCellCount);*/
     
     for (var y = 0; y < playerSolution.length; y++)
     {
@@ -179,12 +160,17 @@ function DrawHints()
     
     context.closePath();
     
+    // I forgot the story behind these magic calculations, but it works, so...
+    
     for (var row = 0; row < image.height; row++)
     {
         var hints = rowHints[row].split(" ");
         for (var i = 1; i <= hints.length; i++)
         {
-            context.fillText(hints[hints.length - i], (rowHintCellCount - i) * cellSize + (cellSize / 5), ((columnHintCellCount + row + 1) * cellSize) - (cellSize / 10));
+            context.fillText(hints[hints.length - i],
+                ((rowHintCellCount - i) * cellSize) + (cellSize / 5),
+                ((columnHintCellCount + row + 1) * cellSize) - (cellSize / 10)
+            );
         }
     }
     
@@ -193,7 +179,10 @@ function DrawHints()
         var hints = columnHints[column].split(" ");
         for (var i = 1; i <= hints.length; i++)
         {
-            context.fillText(hints[hints.length - i], (rowHintCellCount + column + 0.25) * cellSize - 1, ((columnHintCellCount - i + 1) * cellSize) - (cellSize / 10));
+            context.fillText(hints[hints.length - i],
+                ((rowHintCellCount + column + 0.25) * cellSize) - 1,
+                ((columnHintCellCount - i + 1) * cellSize) - (cellSize / 10)
+            );
         }
     }
 }
@@ -201,34 +190,25 @@ function DrawHints()
 function SetUpEvents()
 {
     $(context.canvas).click(function(eventArgs)
-                            {
-                                var cursor =
-                                {
-                                    x: eventArgs.pageX - $canvas.offset().left - (rowHintCellCount * cellSize),
-                                    y: eventArgs.pageY - $canvas.offset().top - (columnHintCellCount * cellSize)
-                                };
-                                
-                                if (cursor.x >= 0 && cursor.x < $canvas.width()
-                                    &&
-                                    cursor.y >= 0 && cursor.y < $canvas.height())
-                                {
-                                    var cell =
-                                    {
-                                        column: Math.floor(cursor.x / cellSize),
-                                        row: Math.floor(cursor.y / cellSize)
-                                    };
-                                    
-                                    if (playerSolution[cell.row][cell.column] == 0)
-                                    {
-                                        playerSolution[cell.row][cell.column] = 1;
-                                    }
-                                    else
-                                    {
-                                        playerSolution[cell.row][cell.column] = 0;
-                                    }
-                                    Render();
-                                }
-                            });
+    {
+        var cursor =
+        {
+            x: eventArgs.pageX - $canvas.offset().left - (rowHintCellCount * cellSize),
+            y: eventArgs.pageY - $canvas.offset().top - (columnHintCellCount * cellSize)
+        };
+
+        if (cursor.x >= 0 && cursor.x < $canvas.width() && cursor.y >= 0 && cursor.y < $canvas.height())
+        {
+            var cell =
+            {
+                column: Math.floor(cursor.x / cellSize),
+                row: Math.floor(cursor.y / cellSize)
+            };
+
+            playerSolution[cell.row][cell.column] = (playerSolution[cell.row][cell.column] == 0)? 1 : 0;
+            Render();
+        }
+    });
 }
 
 function ClearCanvas()
@@ -247,7 +227,7 @@ function Render()
     DrawGrid();
     DrawHints();
     
-    // Render user solution
+    // Render player solution. Should probably put in another function.
     for (var y = 0; y < playerSolution.length; y++)
     {
         for (var x = 0; x < playerSolution[y].length; x++)
@@ -256,8 +236,9 @@ function Render()
             {
                 context.beginPath();
                 context.rect((rowHintCellCount * cellSize) + (x * cellSize),
-                            (columnHintCellCount * cellSize) + (y * cellSize),
-                            cellSize, cellSize);
+                    (columnHintCellCount * cellSize) + (y * cellSize),
+                    cellSize, cellSize
+                );
                 context.fillStyle = "black";
                 context.fill();
                 context.closePath();
