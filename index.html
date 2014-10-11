@@ -12,6 +12,10 @@
                 $("#content").css("height", $(window).height());
                 
                 $canvas = $("canvas");
+				$canvas.on("contextmenu", function(event)
+					{
+						event.preventDefault();
+					});
                 context = $canvas[0].getContext("2d");
                 
                 image = $("#puzzle_image")[0];

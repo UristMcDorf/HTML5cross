@@ -130,8 +130,6 @@ function DrawGrid()
     
     context.strokeStyle = "#bbb";
     context.stroke();
-    
-    context.closePath();
 }
 
 function DrawHints()
@@ -156,12 +154,13 @@ function DrawHints()
     context.moveTo(rowHintCellCount * cellSize, 0.5);
     context.lineTo(context.canvas.width, 0.5);
     
+	context.strokeStyle = "bbb";
     context.stroke();
     
-    context.closePath();
-    
+	context.beginPath();
+	context.fillStyle = "black";
+	
     // I forgot the story behind these magic calculations, but it works, so...
-    
     for (var row = 0; row < image.height; row++)
     {
         var hints = rowHints[row].split(" ");
@@ -189,12 +188,12 @@ function DrawHints()
 
 function SetUpEvents()
 {
-    $(context.canvas).click(function(eventArgs)
+    $(context.canvas).mousedown(function(eventArguments)
     {
         var cursor =
         {
-            x: eventArgs.pageX - $canvas.offset().left - (rowHintCellCount * cellSize),
-            y: eventArgs.pageY - $canvas.offset().top - (columnHintCellCount * cellSize)
+            x: eventArguments.pageX - $canvas.offset().left - (rowHintCellCount * cellSize),
+            y: eventArguments.pageY - $canvas.offset().top - (columnHintCellCount * cellSize)
         };
 
         if (cursor.x >= 0 && cursor.x < $canvas.width() && cursor.y >= 0 && cursor.y < $canvas.height())
@@ -204,8 +203,20 @@ function SetUpEvents()
                 column: Math.floor(cursor.x / cellSize),
                 row: Math.floor(cursor.y / cellSize)
             };
-
-            playerSolution[cell.row][cell.column] = (playerSolution[cell.row][cell.column] == 0)? 1 : 0;
+			
+			switch (eventArguments.which)
+			{
+			default:
+				break;
+			
+			case 1:		// LMB
+				playerSolution[cell.row][cell.column] = (playerSolution[cell.row][cell.column] == 1)? 0 : 1;
+				break;
+			case 3:		// RMB
+				playerSolution[cell.row][cell.column] = (playerSolution[cell.row][cell.column] == -1)? 0 : -1;
+				break;
+			}
+            
             Render();
         }
     });
@@ -232,17 +243,31 @@ function Render()
     {
         for (var x = 0; x < playerSolution[y].length; x++)
         {
-            if (playerSolution[y][x] == 1)
-            {
-                context.beginPath();
-                context.rect((rowHintCellCount * cellSize) + (x * cellSize),
-                    (columnHintCellCount * cellSize) + (y * cellSize),
-                    cellSize, cellSize
-                );
-                context.fillStyle = "black";
-                context.fill();
-                context.closePath();
-            }
+			if (playerSolution[y][x] != 0)
+			{
+				context.beginPath();
+				
+				switch (playerSolution[y][x])
+				{
+				default:
+					break;
+				
+				case -1:	// Red box
+					context.rect((rowHintCellCount * cellSize) + (x * cellSize),
+						(columnHintCellCount * cellSize) + (y * cellSize),
+						cellSize, cellSize);
+					context.fillStyle = "red";
+					break;
+				case 1:		// Black box
+					context.rect((rowHintCellCount * cellSize) + (x * cellSize),
+						(columnHintCellCount * cellSize) + (y * cellSize),
+						cellSize, cellSize);
+					context.fillStyle = "black";
+					break;
+				}
+			
+				context.fill();
+			}
         }
     }
 }
