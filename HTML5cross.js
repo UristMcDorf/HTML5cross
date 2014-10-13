@@ -1,6 +1,7 @@
 var columnHintCellCount = 0, columnHints, context, cellSize = 10, image, rowHintCellCount = 0, rowHints, playerSolution;
 var $canvas;
-
+const alreadyFilledBit = 1 << 15; //so that cells don't flicker when we drag over them, we mark them with this bit; we're not going to use more than 2^14 colours, I hope, but it can be expanded anyway
+const crossedOutCellBit = 1 << 16; //to mark cells that have been crossed
 
 function GeneratePuzzle()
 {
@@ -154,12 +155,12 @@ function DrawHints()
     context.moveTo(rowHintCellCount * cellSize, 0.5);
     context.lineTo(context.canvas.width, 0.5);
     
-	context.strokeStyle = "bbb";
+    context.strokeStyle = "bbb";
     context.stroke();
     
-	context.beginPath();
-	context.fillStyle = "black";
-	
+    context.beginPath();
+    context.fillStyle = "black";
+    
     // I forgot the story behind these magic calculations, but it works, so...
     for (var row = 0; row < image.height; row++)
     {
@@ -188,38 +189,100 @@ function DrawHints()
 
 function SetUpEvents()
 {
+    var isMouseDown = false, whichButton = 0;
+    
     $(context.canvas).mousedown(function(eventArguments)
     {
-        var cursor =
-        {
-            x: eventArguments.pageX - $canvas.offset().left - (rowHintCellCount * cellSize),
-            y: eventArguments.pageY - $canvas.offset().top - (columnHintCellCount * cellSize)
-        };
+        isMouseDown = true;
+        whichButton = eventArguments.which;
+        
+        var cell = GetCell(eventArguments.pageX, eventArguments.pageY);
+        
+        if(cell.x < 0 || cell.y < 0) return; //only possible if it's outside the puzzle area
 
-        if (cursor.x >= 0 && cursor.x < $canvas.width() && cursor.y >= 0 && cursor.y < $canvas.height())
+        switch (whichButton)
         {
-            var cell =
-            {
-                column: Math.floor(cursor.x / cellSize),
-                row: Math.floor(cursor.y / cellSize)
-            };
-			
-			switch (eventArguments.which)
-			{
-			default:
-				break;
-			
-			case 1:		// LMB
-				playerSolution[cell.row][cell.column] = (playerSolution[cell.row][cell.column] == 1)? 0 : 1;
-				break;
-			case 3:		// RMB
-				playerSolution[cell.row][cell.column] = (playerSolution[cell.row][cell.column] == -1)? 0 : -1;
-				break;
-			}
+            default:
+                break;
             
-            Render();
+            case 1:        // LMB
+                FillCell(cell, 1); //black atm; TODO: make it currently selected colour
+                break;
+            case 3:        // RMB
+                FillCell(cell, crossedOutCellBit); //supposed to be cross, red colour atm
+                break;
         }
+            
+        Render();
     });
+    
+    $(context.canvas).mouseup(function(eventArguments)
+    {
+        isMouseDown = false;
+        
+        for(var i = 0; i < playerSolution.length; i++) //since we stopped dragging, clear out the bits that indicate the cells we've dragged over this pass
+            for(var j = 0; j < playerSolution[i].length; j++)
+                playerSolution[i][j] = playerSolution[i][j] & ~alreadyFilledBit;
+            
+        Render();
+    });
+    
+    $(context.canvas).mousemove(function(eventArguments)
+    {
+        if(!isMouseDown) return;
+        
+        var cell = GetCell(eventArguments.pageX, eventArguments.pageY);
+                
+        if(cell.x < 0 || cell.y < 0) return; //only possible if it's outside the puzzle area
+
+        switch (whichButton)
+        {
+            default:
+                break;
+            
+            case 1:        // LMB
+                FillCell(cell, 1); //black atm; TODO: make it currently selected colour
+                break;
+            case 3:        // RMB
+                FillCell(cell, crossedOutCellBit); //supposed to be cross, red colour atm
+                break;
+        }
+            
+        Render();
+    });
+}
+
+function FillCell(cell, value)
+{
+    var cellValue = playerSolution[cell.y][cell.x];
+        
+    if((cellValue | alreadyFilledBit) == cellValue) return; //if it was already filled in this pass, return; we do not need flickering cells every time you move your mouse
+        
+    playerSolution[cell.y][cell.x] = ((cellValue != 0)? 0 : value) | alreadyFilledBit; //paint if empty, erase if not; either way mark it as already fiddled with this pass of the mouse
+        
+    return;
+}
+
+function GetCell(pixelX, pixelY)
+{
+    var cell = 
+    {
+            x: pixelX - $canvas.offset().left - (rowHintCellCount * cellSize),
+            y: pixelY - $canvas.offset().top - (columnHintCellCount * cellSize)
+    };
+    
+    if(cell.x >= 0 && cell.x < $canvas.width() && cell.y >= 0 && cell.y < $canvas.height())
+    {
+        cell.x = Math.floor(cell.x / cellSize);
+        cell.y = Math.floor(cell.y / cellSize);
+    }
+    else //if it's outside the puzzle area, return impossible values
+    {
+        cell.x = -1;
+        cell.y = -1;
+    }
+    
+    return cell;
 }
 
 function ClearCanvas()
@@ -243,31 +306,31 @@ function Render()
     {
         for (var x = 0; x < playerSolution[y].length; x++)
         {
-			if (playerSolution[y][x] != 0)
-			{
-				context.beginPath();
-				
-				switch (playerSolution[y][x])
-				{
-				default:
-					break;
-				
-				case -1:	// Red box
-					context.rect((rowHintCellCount * cellSize) + (x * cellSize),
-						(columnHintCellCount * cellSize) + (y * cellSize),
-						cellSize, cellSize);
-					context.fillStyle = "red";
-					break;
-				case 1:		// Black box
-					context.rect((rowHintCellCount * cellSize) + (x * cellSize),
-						(columnHintCellCount * cellSize) + (y * cellSize),
-						cellSize, cellSize);
-					context.fillStyle = "black";
-					break;
-				}
-			
-				context.fill();
-			}
+            if (playerSolution[y][x] != 0)
+            {
+                context.beginPath();
+                
+                switch (playerSolution[y][x] & ~alreadyFilledBit)
+                {
+                default:
+                    break;
+                
+                case crossedOutCellBit:    // Red box
+                    context.rect((rowHintCellCount * cellSize) + (x * cellSize),
+                        (columnHintCellCount * cellSize) + (y * cellSize),
+                        cellSize, cellSize);
+                    context.fillStyle = "red";
+                    break;
+                case 1:        // Black box
+                    context.rect((rowHintCellCount * cellSize) + (x * cellSize),
+                        (columnHintCellCount * cellSize) + (y * cellSize),
+                        cellSize, cellSize);
+                    context.fillStyle = "black";
+                    break;
+                }
+            
+                context.fill();
+            }
         }
     }
 }
